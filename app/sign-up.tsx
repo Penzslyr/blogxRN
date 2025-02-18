@@ -41,33 +41,33 @@ export default function SignIn() {
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor={colors.primary} barStyle="light-content" />
       <View style={styles.innerContainer}>
-        <Text style={styles.title}>Welcome to blogx!!!!!!</Text>
-        <Text style={styles.subtitle}>Sign in to continue</Text>
-        <TextInput
-          activeUnderlineColor={colors.primary}
-          style={[styles.input, { height: 50, marginBottom: 15 }]}
-          contentStyle={{ height: 50 }} // Adjust the internal content height
-          label="Email"
-          value={email}
-          onChangeText={(text) => setEmail(text)}
-          disabled={isLoading}
-        />
-        <TextInput
-          activeUnderlineColor={colors.primary}
-          style={[styles.input, { height: 50, marginBottom: 10 }]}
-          contentStyle={{ height: 50 }} // Adjust the internal content height
-          label="Password"
-          value={password}
-          onChangeText={(text) => setPassword(text)}
-          disabled={isLoading}
-          secureTextEntry={secureTextEntry}
-          right={
-            <TextInput.Icon
-              onPress={() => setSecureTextEntry(!secureTextEntry)}
-              icon={secureTextEntry ? "eye" : "eye-off"}
-            />
-          }
-        />
+        <Text style={styles.title}>Welcome to SINGUPPPPPPPPPPPPPPPP</Text>
+        <View>
+          <Text style={styles.subtitle}>Sign up to continue</Text>
+          <TextInput
+            activeUnderlineColor={colors.primary}
+            style={[styles.input, { marginBottom: 15 }]}
+            label="Email"
+            value={email}
+            onChangeText={(text) => setEmail(text)}
+            disabled={isLoading}
+          />
+          <TextInput
+            activeUnderlineColor={colors.primary}
+            style={[styles.input, { marginBottom: 10 }]}
+            label="Password"
+            value={password}
+            onChangeText={(text) => setPassword(text)}
+            disabled={isLoading}
+            secureTextEntry={secureTextEntry}
+            right={
+              <TextInput.Icon
+                onPress={() => setSecureTextEntry(!secureTextEntry)}
+                icon={secureTextEntry ? "eye" : "eye-off"}
+              />
+            }
+          />
+        </View>
 
         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
           <Text style={{ color: "#fff", marginBottom: 15 }}>
@@ -120,10 +120,13 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   input: {
-    width: "100%",
+    flex: 1,
+    justifyContent: "center",
     backgroundColor: "#fff",
     paddingHorizontal: 15,
+    paddingBottom: 5,
     fontSize: 16,
+    height: 50,
   },
   button: {
     width: "100%",
