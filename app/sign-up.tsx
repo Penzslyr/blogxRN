@@ -21,8 +21,19 @@ export default function SignIn() {
   const [isLoading, setIsLoading] = useState(false);
   const [secureTextEntry, setSecureTextEntry] = useState(true);
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  interface Iuser {
+    username: string;
+    email: string;
+    password: string;
+    displayName: string;
+  }
+
+  const [user, setUser] = useState<Iuser>({
+    username: "",
+    email: "",
+    password: "",
+    displayName: "",
+  });
 
   useEffect(() => {
     console.log("isLoading", isLoading);
@@ -41,43 +52,60 @@ export default function SignIn() {
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor={colors.primary} barStyle="light-content" />
       <View style={styles.innerContainer}>
-        <Text style={styles.title}>Welcome to SINGUPPPPPPPPPPPPPPPP</Text>
-        <View>
+        <View style={{ justifyContent: "center", alignItems: "center" }}>
+          <Text style={styles.title}>Welcome to blogx</Text>
           <Text style={styles.subtitle}>Sign up to continue</Text>
-          <TextInput
-            activeUnderlineColor={colors.primary}
-            style={[styles.input, { marginBottom: 15 }]}
-            label="Email"
-            value={email}
-            onChangeText={(text) => setEmail(text)}
-            disabled={isLoading}
-          />
-          <TextInput
-            activeUnderlineColor={colors.primary}
-            style={[styles.input, { marginBottom: 10 }]}
-            label="Password"
-            value={password}
-            onChangeText={(text) => setPassword(text)}
-            disabled={isLoading}
-            secureTextEntry={secureTextEntry}
-            right={
-              <TextInput.Icon
-                onPress={() => setSecureTextEntry(!secureTextEntry)}
-                icon={secureTextEntry ? "eye" : "eye-off"}
-              />
-            }
-          />
         </View>
+        <TextInput
+          activeUnderlineColor={colors.primary}
+          style={[styles.input, { height: 50, marginBottom: 15 }]}
+          contentStyle={{ height: 50 }} // Adjust the internal content height
+          label="Username"
+          value={user.username}
+          onChangeText={(text) => setUser({ ...user, username: text })}
+          disabled={isLoading}
+        />
+        <TextInput
+          activeUnderlineColor={colors.primary}
+          style={[styles.input, { height: 50, marginBottom: 15 }]}
+          contentStyle={{ height: 50 }} // Adjust the internal content height
+          label="Email"
+          value={user.email}
+          onChangeText={(text) => setUser({ ...user, email: text })}
+          disabled={isLoading}
+        />
+        <TextInput
+          activeUnderlineColor={colors.primary}
+          style={[styles.input, { height: 50, marginBottom: 10 }]}
+          contentStyle={{ height: 50 }} // Adjust the internal content height
+          label="Password"
+          value={user.password}
+          onChangeText={(text) => setUser({ ...user, password: text })}
+          disabled={isLoading}
+          secureTextEntry={secureTextEntry}
+          right={
+            <TextInput.Icon
+              onPress={() => setSecureTextEntry(!secureTextEntry)}
+              icon={secureTextEntry ? "eye" : "eye-off"}
+            />
+          }
+        />
+        <TextInput
+          activeUnderlineColor={colors.primary}
+          style={[styles.input, { height: 50, marginBottom: 15 }]}
+          contentStyle={{ height: 50 }} // Adjust the internal content height
+          label="Display Name"
+          value={user.displayName}
+          onChangeText={(text) => setUser({ ...user, displayName: text })}
+          disabled={isLoading}
+        />
 
-        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-          <Text style={{ color: "#fff", marginBottom: 15 }}>
-            Forgot password?
-          </Text>
+        <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
           <Text
-            onPress={() => router.replace("/sign-up")}
+            onPress={() => router.replace("/sign-in")}
             style={{ color: "#fff", marginBottom: 15 }}
           >
-            Sign up
+            Sign in
           </Text>
         </View>
 
@@ -89,7 +117,7 @@ export default function SignIn() {
           {isLoading ? (
             <ActivityIndicator size="small" color={colors.primary} />
           ) : (
-            <Text style={styles.buttonText}>Sign In</Text>
+            <Text style={styles.buttonText}>Sign Up</Text>
           )}
         </TouchableOpacity>
       </View>
@@ -120,13 +148,10 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   input: {
-    flex: 1,
-    justifyContent: "center",
+    width: "100%",
     backgroundColor: "#fff",
     paddingHorizontal: 15,
-    paddingBottom: 5,
     fontSize: 16,
-    height: 50,
   },
   button: {
     width: "100%",

@@ -41,8 +41,11 @@ export default function SignIn() {
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor={colors.primary} barStyle="light-content" />
       <View style={styles.innerContainer}>
-        <Text style={styles.title}>Welcome to blogx!!!!!!</Text>
-        <Text style={styles.subtitle}>Sign in to continue</Text>
+        <View style={{ justifyContent: "center", alignItems: "center" }}>
+          <Text style={styles.title}>Welcome to blogx</Text>
+          <Text style={styles.subtitle}>Sign in to continue</Text>
+        </View>
+
         <TextInput
           activeUnderlineColor={colors.primary}
           style={[styles.input, { height: 50, marginBottom: 15 }]}
