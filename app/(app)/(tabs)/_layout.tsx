@@ -1,22 +1,17 @@
-import colors from "@/app/components/color";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Tabs } from "expo-router";
-import { StatusBar } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { Drawer } from "expo-router/drawer";
+import { FontAwesome } from "@expo/vector-icons";
 
-function TabsNav() {
+export default function TabsNav() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: colors.primary,
+        tabBarActiveTintColor: "blue",
         headerShown: false,
-        tabBarShowLabel: false, // Hide text
+        tabBarShowLabel: false,
         tabBarStyle: {
-          height: 60, // Adjust height for better spacing
-          paddingBottom: 10, // Ensure icon is vertically centered
-          paddingTop: 10, // Balance top padding
+          height: 60,
+          paddingBottom: 10,
+          paddingTop: 10,
         },
       }}
     >
@@ -32,19 +27,10 @@ function TabsNav() {
         name="messages"
         options={{
           tabBarIcon: ({ color }) => (
-            <FontAwesome size={28} name="cog" color={color} />
+            <FontAwesome size={28} name="envelope" color={color} />
           ),
         }}
       />
     </Tabs>
-  );
-}
-
-export default function TabLayout() {
-  return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <StatusBar barStyle="dark-content" />
-      <TabsNav />
-    </SafeAreaView>
   );
 }
