@@ -5,6 +5,7 @@ import colors from "@/app/components/color";
 import { DrawerNavigationProp } from "@react-navigation/drawer";
 import { RootDrawerParamList } from "../types";
 import { useNavigation } from "@react-navigation/native";
+import { Avatar, IconButton } from "react-native-paper";
 export default function TabsNav() {
   const navigation = useNavigation<DrawerNavigationProp<RootDrawerParamList>>();
   return (
@@ -26,25 +27,21 @@ export default function TabsNav() {
             style={{ paddingLeft: 15 }}
             onPress={() => navigation.openDrawer()}
           >
-            <Image
-              source={{
-                uri: "https://photoscissors.com/images/samples/1-before.jpg",
-              }} // Replace with your profile picture URL
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: 20, // Makes it circular
-              }}
+            <Avatar.Image
+              size={32}
+              source={{ uri: "https://picsum.photos/200" }}
             />
           </TouchableOpacity>
         ),
         headerTitleAlign: "center",
         headerTitle: "BlogX",
-        // headerRight: () => (
-        //   <View style={{ paddingRight: 15 }}>
-        //     <FontAwesome size={28} name="cog" color="#ed" />
-        //   </View>
-        // ),
+        headerRight: () => (
+          <IconButton
+            icon="star-four-points-outline"
+            size={24}
+            onPress={() => {}}
+          />
+        ),
       }}
     >
       <Tabs.Screen
