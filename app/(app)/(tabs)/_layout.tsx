@@ -6,8 +6,14 @@ import { DrawerNavigationProp } from "@react-navigation/drawer";
 import { RootDrawerParamList } from "../types";
 import { useNavigation } from "@react-navigation/native";
 import { Avatar, IconButton } from "react-native-paper";
+import { useSession } from "../../../ctx";
+import { useEffect } from "react";
 export default function TabsNav() {
   const navigation = useNavigation<DrawerNavigationProp<RootDrawerParamList>>();
+  const { session } = useSession();
+  useEffect(() => {
+    console.log("session", JSON.stringify(session, null, 2));
+  }, [session]);
   return (
     <Tabs
       screenOptions={{
@@ -29,7 +35,7 @@ export default function TabsNav() {
           >
             <Avatar.Image
               size={32}
-              source={{ uri: "https://picsum.photos/200" }}
+              source={{ uri: session?.user?.profilePicture }}
             />
           </TouchableOpacity>
         ),

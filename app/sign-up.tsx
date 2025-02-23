@@ -42,7 +42,7 @@ export default function SignIn() {
   const handleSignIn = () => {
     setIsLoading(true);
     setTimeout(() => {
-      signIn();
+      // signIn();
       setIsLoading(false);
       router.replace("/");
     }, 3000);

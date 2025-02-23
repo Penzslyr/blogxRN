@@ -7,34 +7,47 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
-
 import { TextInput } from "react-native-paper";
-
 import { useSession } from "../ctx";
 import { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import colors from "./components/color"; // Import primary color
+import colors from "./components/color";
 
 export default function SignIn() {
   const { signIn } = useSession();
 
   const [isLoading, setIsLoading] = useState(false);
   const [secureTextEntry, setSecureTextEntry] = useState(true);
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null); // For error feedback
 
   useEffect(() => {
     console.log("isLoading", isLoading);
   }, [isLoading]);
 
-  const handleSignIn = () => {
+  const handleSignIn = async () => {
+    // Validate inputs
+    if (!email || !password) {
+      setError("Please fill in both email and password");
+      return;
+    }
+
     setIsLoading(true);
-    setTimeout(() => {
-      signIn();
+    setError(null); // Clear previous errors
+
+    try {
+      const success = await signIn(email, password);
+      if (success) {
+        router.replace("/"); // Redirect only on success
+      } else {
+        setError("Sign-in failed. Please check your credentials.");
+      }
+    } catch (err) {
+      setError("An unexpected error occurred. Please try again.");
+    } finally {
       setIsLoading(false);
-      router.replace("/");
-    }, 3000);
+    }
   };
 
   return (
@@ -46,10 +59,14 @@ export default function SignIn() {
           <Text style={styles.subtitle}>Sign in to continue</Text>
         </View>
 
+        {error && (
+          <Text style={styles.errorText}>{error}</Text> // Display error
+        )}
+
         <TextInput
           activeUnderlineColor={colors.primary}
           style={[styles.input, { height: 50, marginBottom: 15 }]}
-          contentStyle={{ height: 50 }} // Adjust the internal content height
+          contentStyle={{ height: 50 }}
           label="Email"
           value={email}
           onChangeText={(text) => setEmail(text)}
@@ -58,7 +75,7 @@ export default function SignIn() {
         <TextInput
           activeUnderlineColor={colors.primary}
           style={[styles.input, { height: 50, marginBottom: 10 }]}
-          contentStyle={{ height: 50 }} // Adjust the internal content height
+          contentStyle={{ height: 50 }}
           label="Password"
           value={password}
           onChangeText={(text) => setPassword(text)}
@@ -141,5 +158,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: colors.primary,
     fontFamily: "bold",
+  },
+  errorText: {
+    color: "#ff4444",
+    marginBottom: 15,
+    textAlign: "center",
   },
 });
