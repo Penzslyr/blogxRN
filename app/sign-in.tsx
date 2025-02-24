@@ -14,7 +14,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import colors from "./components/color";
 
 export default function SignIn() {
-  const { signIn } = useSession();
+  const { signIn, session } = useSession();
 
   const [isLoading, setIsLoading] = useState(false);
   const [secureTextEntry, setSecureTextEntry] = useState(true);
@@ -24,6 +24,7 @@ export default function SignIn() {
 
   useEffect(() => {
     console.log("isLoading", isLoading);
+    console.log("session", JSON.stringify(session, null, 2));
   }, [isLoading]);
 
   const handleSignIn = async () => {

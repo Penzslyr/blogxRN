@@ -1,89 +1,58 @@
-import { Button, Pressable, StyleSheet, Text, View, Image } from "react-native";
-import { router } from "expo-router";
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  RefreshControl,
+  ActivityIndicator,
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { RootDrawerParamList } from "../types"; // Import the type
-
 import { useSession } from "../../../ctx";
 import { DrawerNavigationProp } from "@react-navigation/drawer";
-import { Avatar, Divider, IconButton, useTheme } from "react-native-paper";
-import { FlatList } from "react-native-gesture-handler";
+import {
+  Avatar,
+  Divider,
+  IconButton,
+  useTheme,
+  Button,
+} from "react-native-paper";
+import { FlatList } from "react-native";
+import { useEffect, useState } from "react";
 
-interface Tweet {
-  id: string;
-  user: {
-    name: string;
-    handle: string;
-    avatar: string;
-  };
-  content: string;
-  timestamp: string;
-  stats: {
-    replies: number;
-    retweets: number;
-    likes: number;
-  };
-}
+const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
-const mockTweets: Tweet[] = [
-  {
-    id: "1",
-    user: {
-      name: "Martha Craig",
-      handle: "craig_love",
-      avatar: "https://picsum.photos/200",
-    },
-    content:
-      "UXR/UX: You can only bring one item to a remote island to assist your research of native use of tools and usability. What do you bring? #TellMeAboutYou",
-    timestamp: "12h",
-    stats: {
-      replies: 28,
-      retweets: 5,
-      likes: 21,
-    },
-  },
-  {
-    id: "2",
-    user: {
-      name: "Maximmilian",
-      handle: "maxjacobson",
-      avatar: "https://picsum.photos/201",
-    },
-    content: "Y'all ready for this next post?",
-    timestamp: "3h",
-    stats: {
-      replies: 46,
-      retweets: 18,
-      likes: 363,
-    },
-  },
-  {
-    id: "3",
-    user: {
-      name: "Tabitha Potter",
-      handle: "mis_potter",
-      avatar: "https://picsum.photos/202",
-    },
-    content: "Kobe's passing really changed me in a way I didn't expect.",
-    timestamp: "14h",
-    stats: {
-      replies: 7,
-      retweets: 1,
-      likes: 11,
-    },
-  },
-];
+// Helper function to format timestamp (e.g., "2h ago")
+const formatTimestamp = (createdAt: string) => {
+  const now = new Date();
+  const postDate = new Date(createdAt);
+  const diffMs = now.getTime() - postDate.getTime();
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  if (diffHours < 1) return `${Math.floor(diffMs / (1000 * 60))}m`;
+  if (diffHours < 24) return `${diffHours}h`;
+  return `${Math.floor(diffHours / 24)}d`;
+};
 
-function TweetCard({ tweet }: { tweet: Tweet }) {
+function TweetCard({ tweet }: { tweet: any }) {
   const theme = useTheme();
 
   return (
     <View style={styles.tweetContainer}>
-      <Avatar.Image size={40} source={{ uri: tweet.user.avatar }} />
+      <Avatar.Image
+        size={40}
+        source={{
+          uri: tweet.user.profilePicture
+            ? tweet.user.profilePicture
+            : "https://picsum.photos/200",
+        }}
+      />
       <View style={styles.tweetContent}>
         <View style={styles.tweetHeader}>
-          <Text style={styles.userName}>{tweet.user.name}</Text>
-          <Text style={styles.userHandle}>@{tweet.user.handle}</Text>
-          <Text style={styles.timestamp}>· {tweet.timestamp}</Text>
+          <Text style={styles.userName}>{tweet.user.username}</Text>
+          <Text style={styles.userHandle}>@{tweet.user.displayName}</Text>
+          <Text style={styles.timestamp}>
+            · {formatTimestamp(tweet.createdAt)}
+          </Text>
         </View>
         <Text style={styles.tweetText}>{tweet.content}</Text>
         <View style={styles.tweetActions}>
@@ -94,7 +63,7 @@ function TweetCard({ tweet }: { tweet: Tweet }) {
               onPress={() => {}}
               iconColor={theme.colors.onSurfaceVariant}
             />
-            <Text style={styles.actionText}>{tweet.stats.replies}</Text>
+            <Text style={styles.actionText}>{tweet.comments}</Text>
           </View>
           <View style={styles.actionItem}>
             <IconButton
@@ -103,7 +72,7 @@ function TweetCard({ tweet }: { tweet: Tweet }) {
               onPress={() => {}}
               iconColor={theme.colors.onSurfaceVariant}
             />
-            <Text style={styles.actionText}>{tweet.stats.retweets}</Text>
+            <Text style={styles.actionText}>0</Text>
           </View>
           <View style={styles.actionItem}>
             <IconButton
@@ -112,7 +81,7 @@ function TweetCard({ tweet }: { tweet: Tweet }) {
               onPress={() => {}}
               iconColor={theme.colors.onSurfaceVariant}
             />
-            <Text style={styles.actionText}>{tweet.stats.likes}</Text>
+            <Text style={styles.actionText}>{tweet.likes}</Text>
           </View>
           <IconButton
             icon="share-outline"
@@ -127,35 +96,102 @@ function TweetCard({ tweet }: { tweet: Tweet }) {
 }
 
 export default function Index() {
+  const [tweets, setTweets] = useState<any[]>([]);
+  const [refreshing, setRefreshing] = useState(false); // For pull-to-refresh
+  const [loading, setLoading] = useState(true); // For initial load
+  const [error, setError] = useState<string | null>(null); // For error state
   const navigation = useNavigation<DrawerNavigationProp<RootDrawerParamList>>();
   const { signOut } = useSession();
   const theme = useTheme();
+
+  // Function to fetch tweets from API
+  const fetchTweets = async () => {
+    try {
+      setError(null); // Clear any previous error
+      const response = await fetch(`${API_URL}/api/posts`);
+      if (!response.ok) throw new Error("Network response was not ok");
+      const data = await response.json();
+      setTweets(data);
+    } catch (error) {
+      console.error("Error fetching posts:", error);
+      setError("Failed to load posts. Please try again.");
+    } finally {
+      setLoading(false); // Stop loading regardless of success or failure
+      setRefreshing(false); // Stop refreshing if triggered by pull-to-refresh
+    }
+  };
+
+  // Initial fetch on mount
+  useEffect(() => {
+    fetchTweets();
+  }, []);
+
+  // Handle pull-to-refresh
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchTweets();
+  };
+
+  // Render loading, error, or content
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+        <Text style={styles.loadingText}>Loading posts...</Text>
+      </View>
+    );
+  }
+
+  if (error && !refreshing) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>{error}</Text>
+        <Button
+          mode="contained"
+          onPress={fetchTweets}
+          style={styles.retryButton}
+          buttonColor={theme.colors.primary}
+        >
+          Retry
+        </Button>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <FlatList
-        data={mockTweets}
-        keyExtractor={(item) => item.id}
+        data={tweets}
+        keyExtractor={(item) => item._id}
         renderItem={({ item }) => <TweetCard tweet={item} />}
         ItemSeparatorComponent={() => <Divider />}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={theme.colors.primary}
+          />
+        }
       />
       <Text
         onPress={() => {
-          // The `app/(app)/_layout.tsx` will redirect to the sign-in screen.
           signOut();
         }}
+        style={{ padding: 10, color: theme.colors.primary }}
       >
         Sign Out
       </Text>
       <Pressable
-        onPress={() => navigation.openDrawer()} // Open the Drawer
+        onPress={() => navigation.openDrawer()}
         style={{
           padding: 10,
           backgroundColor: "blue",
           borderRadius: 5,
           marginTop: 10,
+          marginBottom: 20,
         }}
       >
-        <Text style={{ color: "white" }}>Open Drawer</Text>
+        <Text style={{ color: "white", textAlign: "center" }}>Open Drawer</Text>
       </Pressable>
     </View>
   );
@@ -164,22 +200,34 @@ export default function Index() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#fff",
   },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
     alignItems: "center",
-    padding: 16,
-    borderBottomWidth: 0.5,
-    borderBottomColor: "#ccc",
+    backgroundColor: "#fff",
   },
-  headerAvatar: {
-    marginRight: 16,
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: "#536471",
   },
-  logo: {
-    width: 30,
-    height: 30,
-    resizeMode: "contain",
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    padding: 20,
+  },
+  errorText: {
+    fontSize: 16,
+    color: "#ff3333",
+    textAlign: "center",
+    marginBottom: 20,
+  },
+  retryButton: {
+    borderRadius: 5,
   },
   tweetContainer: {
     flexDirection: "row",
@@ -198,22 +246,27 @@ const styles = StyleSheet.create({
   },
   userName: {
     fontWeight: "bold",
+    fontSize: 16,
   },
   userHandle: {
     color: "#536471",
+    fontSize: 14,
   },
   timestamp: {
     color: "#536471",
+    fontSize: 14,
   },
   tweetText: {
     marginTop: 4,
     lineHeight: 20,
+    fontSize: 15,
   },
   tweetActions: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginLeft: -12, // Adjust this value as needed
+    marginLeft: -12,
+    marginTop: 8,
   },
   actionItem: {
     flexDirection: "row",
@@ -222,5 +275,6 @@ const styles = StyleSheet.create({
   actionText: {
     color: "#536471",
     marginLeft: 4,
+    fontSize: 13,
   },
 });

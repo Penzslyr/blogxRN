@@ -6,6 +6,7 @@ import { StatusBar } from "react-native";
 import { Text } from "react-native";
 
 import { useSession } from "../../ctx";
+import { useEffect } from "react";
 
 export default function AppLayout() {
   const { session, isLoading } = useSession();
@@ -14,7 +15,7 @@ export default function AppLayout() {
     return <Text>Loading...</Text>;
   }
 
-  if (!session) {
+  if (!session?.token) {
     return <Redirect href="/sign-in" />;
   }
 
